@@ -1,8 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { AlertTriangle, FileText } from "lucide-react";
+import { useState } from "react";
+import { AlertTriangle, FileText, UploadCloud } from "lucide-react";
+import { toast } from "sonner";
 import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/StatusBadge";
 import { mockParticipants } from "@/data/mockParticipants";
 import { GUARDIAN_CHILD_IDS } from "@/data/guardianContext";
@@ -12,6 +15,7 @@ export const Route = createFileRoute("/guardian/documents")({
 });
 
 function GuardianDocuments() {
+  const [selectedFiles, setSelectedFiles] = useState<Record<string, File>>({});
   const children = mockParticipants.filter((p) => GUARDIAN_CHILD_IDS.includes(p.id));
   const anyMissing = children.some((c) => c.documents.some((d) => d.status === "Missing"));
 
@@ -29,7 +33,7 @@ function GuardianDocuments() {
         <div className="flex items-start gap-3 rounded-2xl border border-amber-300 bg-amber-50 p-4">
           <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
           <p className="text-sm text-amber-900">
-            Some documents are missing. Please contact your academy.
+            Some documents are missing. Please click the Upload button to provide them.
           </p>
         </div>
       )}
@@ -64,15 +68,80 @@ function GuardianDocuments() {
                   ) : (
                     <ul className="divide-y rounded-md border">
                       {child.documents.map((d) => (
-                        <li key={d.name} className="flex items-center justify-between px-4 py-3">
-                          <div className="flex items-center gap-3">
-                            <FileText className="h-4 w-4 text-muted-foreground" />
-                            <div>
-                              <p className="text-sm font-medium">{d.name}</p>
-                              <p className="text-xs text-muted-foreground">Required document</p>
+                        <li key={d.name} className="flex flex-col px-4 py-3">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <FileText className="h-4 w-4 text-muted-foreground" />
+                              <div>
+                                <p className="text-sm font-medium">{d.name}</p>
+                                <p className="text-xs text-muted-foreground">Required document</p>
+                              </div>
                             </div>
+                            <StatusBadge status={docBadge(d.status)} />
                           </div>
-                          <StatusBadge status={docBadge(d.status)} />
+
+                          {d.status === "Missing" && (() => {
+                            const fileKey = `${child.id}-${d.name.replace(/\s/g, '')}`;
+                            const selectedFile = selectedFiles[fileKey];
+
+                            return (
+                              <div className="mt-4">
+                                {selectedFile ? (
+                                  <div className="flex items-center justify-between rounded-xl border p-4 bg-emerald-50/30">
+                                    <div className="flex items-center gap-3">
+                                      <FileText className="h-5 w-5 text-emerald-600" />
+                                      <div className="text-left">
+                                        <p className="text-sm font-medium">{selectedFile.name}</p>
+                                        <p className="text-xs text-muted-foreground">Ready to upload</p>
+                                      </div>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => setSelectedFiles(prev => { const next = { ...prev }; delete next[fileKey]; return next; })}
+                                      >
+                                        Cancel
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        onClick={() => {
+                                          toast.success(`${d.name} uploaded successfully and sent to admin for review!`);
+                                          setSelectedFiles(prev => { const next = { ...prev }; delete next[fileKey]; return next; });
+                                        }}
+                                      >
+                                        Upload
+                                      </Button>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <>
+                                    <input
+                                      type="file"
+                                      id={`upload-${fileKey}`}
+                                      className="hidden"
+                                      onChange={(e) => {
+                                        if (e.target.files && e.target.files.length > 0) {
+                                          setSelectedFiles(prev => ({ ...prev, [fileKey]: e.target.files![0] }));
+                                        }
+                                      }}
+                                    />
+                                    <label
+                                      htmlFor={`upload-${fileKey}`}
+                                      className="flex w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-emerald-400 bg-emerald-50/50 py-6 text-center hover:bg-emerald-50 transition-colors"
+                                    >
+                                      <p className="text-sm text-muted-foreground">
+                                        <span className="font-semibold text-emerald-600">Upload Files</span>
+                                      </p>
+                                      <p className="text-xs text-muted-foreground mt-1">
+                                        (docx, pdf, etc)
+                                      </p>
+                                    </label>
+                                  </>
+                                )}
+                              </div>
+                            );
+                          })()}
                         </li>
                       ))}
                     </ul>

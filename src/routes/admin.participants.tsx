@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Download, Eye, Pencil } from "lucide-react";
+import { Download, Eye, Pencil, Check, X } from "lucide-react";
+import { toast } from "sonner";
 import { PageHeader } from "@/components/PageHeader";
 import { DataTable, type Column } from "@/components/DataTable";
 import { StatusBadge } from "@/components/StatusBadge";
@@ -73,6 +74,28 @@ function ParticipantsPage() {
       key: "actions", header: "Actions",
       render: (r) => (
         <div className="flex gap-1">
+          {(r.status === "Inquiry" || r.registrationData) && (
+            <>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="text-green-600 hover:text-green-700 hover:bg-green-50" 
+                title="Accept"
+                onClick={(e) => { e.stopPropagation(); toast.success("Participant has been accepted!"); }}
+              >
+                <Check className="h-4 w-4" />
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="text-red-600 hover:text-red-700 hover:bg-red-50" 
+                title="Reject"
+                onClick={(e) => { e.stopPropagation(); toast.success("Participant has been rejected."); }}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </>
+          )}
           <Button variant="ghost" size="icon" onClick={() => setSelected(r)}><Eye className="h-4 w-4" /></Button>
           <Button variant="ghost" size="icon"><Pencil className="h-4 w-4" /></Button>
         </div>
@@ -135,11 +158,13 @@ function ParticipantsPage() {
         />
       </div>
 
-      {/* <Sheet open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
-        <SheetContent className="w-full sm:max-w-2xl">
+      <Sheet open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
+        <SheetContent className="w-full overflow-y-auto sm:max-w-2xl">
           {selected && <ParticipantDetail p={selected} />}
         </SheetContent>
       </Sheet>
+
+      {/* 
 
       <Sheet open={addOpen} onOpenChange={setAddOpen}>
         <SheetContent className="w-full sm:max-w-lg">
@@ -198,7 +223,11 @@ function ParticipantsPage() {
             <SheetDescription>Register a new participant.</SheetDescription>
           </SheetHeader>
 
-          <form className="space-y-3 pb-6" onSubmit={(e) => { e.preventDefault(); setAddOpen(false); }}>
+          <form className="space-y-3 pb-6" onSubmit={(e) => {
+            e.preventDefault();
+            setAddOpen(false);
+            toast.success("Participant has been created and the credentials are sent to the guardian");
+          }}>
 
             {/* Name Fields */}
             <div className="grid grid-cols-2 gap-3">
@@ -227,13 +256,31 @@ function ParticipantsPage() {
                 <Select name="locationSlug">
                   <SelectTrigger><SelectValue placeholder="Select location" /></SelectTrigger>
                   <SelectContent>
-                    {/* {mockLocations.map((l) => (
-                <SelectItem key={l.id} value={l.slug}>{l.name}</SelectItem>
-              ))} */}
+                    {mockLocations.map((l) => (
+                      <SelectItem key={l.id} value={l.name}>{l.name}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </Field>
             </div>
+
+
+            <div className="grid grid-cols- gap-3">
+              <Field label="Session">
+                <Select name="SessionSlug">
+                  <SelectTrigger><SelectValue placeholder="Select Session" /></SelectTrigger>
+                  <SelectContent>
+                    {mockSessions.map((s) => (
+                      <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
+            </div>
+
+
+
+
 
             <hr className="my-4 border-muted" />
             <p className="text-sm ">Guardian Information</p>
@@ -304,6 +351,39 @@ function ParticipantDetail({ p }: { p: MockParticipant }) {
               <Info label="Phone" value={p.guardianPhone} />
               <Info label="Email" value={p.guardianEmail} />
             </div>
+
+            {p.registrationData && (
+              <>
+                <hr className="my-6 border-muted" />
+                <h4 className="mb-3 text-sm font-semibold text-foreground">Registration Submitted Data</h4>
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <Info label="Emergency Contact Name" value={p.registrationData.emergencyContactName} />
+                  <Info label="Emergency Contact Phone" value={p.registrationData.emergencyContactPhone} />
+                  <Info label="Medical Conditions" value={p.registrationData.medicalConditions} />
+                  <Info label="Previous Sports Experience" value={p.registrationData.previousExperience} />
+                  <Info label="How did you hear about us?" value={p.registrationData.source} />
+                  <Info label="Consent Form" value={p.registrationData.consentSigned ? "Signed" : "Not Signed"} />
+                </div>
+              </>
+            )}
+
+            {(p.status === "Inquiry" || p.registrationData) && (
+              <div className="mt-8 flex gap-3">
+                <Button 
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white" 
+                  onClick={() => toast.success("Participant has been accepted!")}
+                >
+                  Accept Participant
+                </Button>
+                <Button 
+                  variant="destructive" 
+                  className="flex-1" 
+                  onClick={() => toast.success("Participant has been rejected.")}
+                >
+                  Reject Participant
+                </Button>
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="documents" className="mt-4 space-y-2">
