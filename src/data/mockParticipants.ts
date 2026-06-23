@@ -20,6 +20,15 @@ export interface ParticipantNote {
   timestamp: string;
 }
 
+export interface RegistrationData {
+  emergencyContactName: string;
+  emergencyContactPhone: string;
+  medicalConditions: string;
+  previousExperience: string;
+  source: string;
+  consentSigned: boolean;
+}
+
 export interface MockParticipant {
   id: string;
   fullName: string;
@@ -35,6 +44,7 @@ export interface MockParticipant {
   uniqueId: string;
   documents: ParticipantDocument[];
   notes: ParticipantNote[];
+  registrationData?: RegistrationData;
 }
 
 export const mockParticipants: MockParticipant[] = [
@@ -81,7 +91,10 @@ export const mockParticipants: MockParticipant[] = [
     guardianPhone: "+966 53 456 7890", guardianEmail: "h.zahrani@example.sa",
     location: "Dammam Centre", session: "Winter Programme", status: "Inquiry",
     age: 8, nationality: "Saudi", joinedDate: "2025-11-02",
-    documents: [{ name: "ID Copy", status: "Missing" }],
+    documents: [
+      { name: "ID Copy", status: "Missing" },
+      { name: "Medical Form", status: "Missing" }
+    ],
     notes: [{ text: "Trial requested for next week.", author: "Front Desk", timestamp: "2025-11-02T14:00:00Z" }],
   },
   {
@@ -210,4 +223,38 @@ export const mockParticipants: MockParticipant[] = [
     ],
     notes: [{ text: "Reminder sent for outstanding balance.", author: "Finance Team", timestamp: "2025-10-05T09:15:00Z" }],
   },
+  {
+    id: "p-016", uniqueId: "NMR-1016",
+    fullName: "Zainab Al-Farsi", guardianName: "Majid Al-Farsi",
+    guardianPhone: "+966 50 999 8888", guardianEmail: "m.farsi@example.sa",
+    location: "Riyadh Academy", session: "Spring 2025", status: "Inquiry",
+    age: 10, nationality: "Omani", joinedDate: "2025-01-10",
+    documents: [],
+    notes: [],
+    registrationData: {
+      emergencyContactName: "Sara Al-Farsi",
+      emergencyContactPhone: "+966 50 999 8889",
+      medicalConditions: "None",
+      previousExperience: "Beginner",
+      source: "Facebook Ad",
+      consentSigned: true,
+    }
+  },
+  {
+    id: "p-017", uniqueId: "NMR-1017",
+    fullName: "Sami Al-Qahtani", guardianName: "Fahad Al-Qahtani",
+    guardianPhone: "+966 55 777 6666", guardianEmail: "f.qahtani@example.sa",
+    location: "Jeddah Branch", session: "Summer Camp 2025", status: "Inquiry",
+    age: 12, nationality: "Saudi", joinedDate: "2025-01-12",
+    documents: [],
+    notes: [],
+    registrationData: {
+      emergencyContactName: "Mona Al-Qahtani",
+      emergencyContactPhone: "+966 55 777 6667",
+      medicalConditions: "Asthma",
+      previousExperience: "1 year club level",
+      source: "Friend referral",
+      consentSigned: true,
+    }
+  }
 ];
