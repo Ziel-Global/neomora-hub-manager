@@ -393,7 +393,9 @@ function ParticipantDetail({ p }: { p: MockParticipant }) {
                   <p className="text-sm font-medium">{d.name}</p>
                   <StatusBadge status={d.status === "Uploaded" ? "Active" : d.status === "Missing" ? "On Hold" : "Pending"} />
                 </div>
-                <Button size="sm" variant="outline">Upload</Button>
+                <Button size="sm" variant="outline">
+                  {d.status === "Uploaded" ? "View" : "Upload"}
+                </Button>
               </div>
             ))}
             {p.documents.length === 0 && <p className="text-sm text-muted-foreground">No documents on file.</p>}
