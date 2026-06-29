@@ -259,9 +259,9 @@ function EnrolmentsPage() {
               <Select value={form.paymentPlanType} onValueChange={(val) => setForm((f) => ({ ...f, paymentPlanType: val }))}>
                 <SelectTrigger><SelectValue placeholder="Select plan type" /></SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="FULL">Full</SelectItem>
                   <SelectItem value="MONTHLY">Monthly</SelectItem>
-                  <SelectItem value="QUARTERLY">Quarterly</SelectItem>
-                  <SelectItem value="CUSTOM">Custom</SelectItem>
+                  <SelectItem value="SEASONAL">Seasonal</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -304,8 +304,9 @@ function EnrolmentsPage() {
                 <SelectContent>
                   <SelectItem value="FULL">Full</SelectItem>
                   <SelectItem value="MONTHLY">Monthly</SelectItem>
-                  <SelectItem value="QUARTERLY">Quarterly</SelectItem>
-                  <SelectItem value="CUSTOM">Custom</SelectItem>
+                  {/* <SelectItem value="QUARTERLY">Quarterly</SelectItem> */}
+                  {/* <SelectItem value="CUSTOM">Custom</SelectItem> */}
+                  <select value="SEASONAL">Seasonal</select>
                 </SelectContent>
               </Select>
             </div>
