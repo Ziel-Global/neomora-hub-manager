@@ -6,6 +6,8 @@ const navItems = [
   { label: "Dashboard", to: "/location-manager", icon: LayoutDashboard },
   { label: "My Sessions", to: "/location-manager/sessions", icon: CalendarDays },
   { label: "Participants", to: "/location-manager/participants", icon: Users },
+    { label: "Enrollments", to: "/location-manager/enrolments", icon: Users },
+
   { label: "Waitlist", to: "/location-manager/waitlist", icon: ListOrdered },
   { label: "Communications", to: "/location-manager/communications", icon: MessageSquare },
 ];
