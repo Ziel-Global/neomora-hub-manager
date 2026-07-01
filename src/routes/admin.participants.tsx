@@ -616,6 +616,8 @@ function ParticipantsPage() {
       ),
     },
     { key: "day", header: "DAY" },
+        {key :"session", header: "SESSION"},
+
     { key: "ageGroup", header: "AGE GROUP / SESSION" },
     {
       key: "status", header: "Status",
@@ -687,6 +689,15 @@ function ParticipantsPage() {
           {ageGroups.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
         </SelectContent>
       </Select>
+
+      {/* <Select value={sesFilter} onValueChange={setSesFilter}>
+        <SelectTrigger className="w-[160px]"><SelectValue placeholder="Session" /></SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">All Session</SelectItem>
+          <SelectItem value="4.30 - 5.30 PM">4:30 to 5:30 PM</SelectItem>
+          <SelectItem value="5.45 - 7 PM">5:45 to 7:00 PM</SelectItem>
+        </SelectContent>
+      </Select> */}
     </>
   );
 

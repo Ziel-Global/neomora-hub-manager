@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Download } from "lucide-react";
+import { useState } from "react";
+import { Download, Users, DollarSign, Activity, TrendingUp, BarChart3, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid, Cell,
+  LineChart, Line, PieChart, Pie
 } from "recharts";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -13,7 +15,37 @@ export const Route = createFileRoute("/admin/reports")({
 
 const SAR = (n: number) => `SAR ${n.toLocaleString()}`;
 
+function MetricCard({ title, value, change, trend, icon: Icon, isActive, onClick }: { title: string, value: string, change: string, trend: "up" | "down" | "neutral", icon: any, isActive?: boolean, onClick?: () => void }) {
+  return (
+    <div
+      onClick={onClick}
+      className={`rounded-xl border bg-card p-5 shadow-sm flex flex-col justify-between cursor-pointer transition-all hover:border-brand/50 ${isActive ? 'ring-2 ring-brand border-transparent' : ''}`}
+    >
+      <div className="flex items-center justify-between">
+        <p className="text-sm font-medium text-muted-foreground">{title}</p>
+        <div className={`flex h-8 w-8 items-center justify-center rounded-full ${isActive ? 'bg-brand text-primary-foreground' : 'bg-primary/10 text-primary'}`}>
+          <Icon className="h-4 w-4" />
+        </div>
+      </div>
+      <div className="mt-4">
+        <h3 className="text-2xl font-bold">{value}</h3>
+        <div className="mt-1 flex items-center text-xs">
+          {trend === "up" && <ArrowUpRight className="mr-1 h-3 w-3 text-emerald-500" />}
+          {trend === "down" && <ArrowDownRight className="mr-1 h-3 w-3 text-red-500" />}
+          {trend === "neutral" && <span className="mr-1 text-muted-foreground">-</span>}
+          <span className={trend === "up" ? "text-emerald-500 font-medium" : trend === "down" ? "text-red-500 font-medium" : "text-muted-foreground"}>
+            {change}
+          </span>
+          <span className="ml-1 text-muted-foreground">vs last month</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function ReportsPage() {
+  const [activeMetric, setActiveMetric] = useState("revenue");
+
   const funnelWithDrop = funnelData.map((f, i) => {
     const prev = i > 0 ? funnelData[i - 1].count : f.count;
     const drop = prev === 0 ? 0 : Math.round(((prev - f.count) / prev) * 100);
@@ -24,21 +56,102 @@ function ReportsPage() {
     <>
       <PageHeader title="Reports" />
       <div className="space-y-6 p-6">
-        <Panel title="Monthly Revenue (2025)" subtitle="Revenue vs target, SAR">
-          <div className="h-72 w-full">
-            <ResponsiveContainer>
-              <BarChart data={monthlyRevenue}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                <XAxis dataKey="month" stroke="var(--muted-foreground)" fontSize={12} />
-                <YAxis stroke="var(--muted-foreground)" fontSize={12} tickFormatter={(v) => `${v / 1000}k`} />
-                <Tooltip formatter={(v: number) => SAR(v)} contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 8 }} />
-                <Legend />
-                <Bar dataKey="target" fill="var(--muted-foreground)" name="Target" radius={[4, 4, 0, 0]} opacity={0.4} />
-                <Bar dataKey="revenue" fill="var(--brand)" name="Revenue" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </Panel>
+
+        {/* Metric Cards (5 columns on large screens) */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          <MetricCard title="Total Revenue" value="SAR 240.9K" change="18%" trend="up" icon={DollarSign} isActive={activeMetric === "revenue"} onClick={() => setActiveMetric("revenue")} />
+          <MetricCard title="Avg. Revenue per User" value="SAR 1,130" change="8.4%" trend="up" icon={Activity} isActive={activeMetric === "avg_revenue"} onClick={() => setActiveMetric("avg_revenue")} />
+
+          <MetricCard title="Total Enrolled Participants" value="215" change="31 new" trend="up" icon={Users} isActive={activeMetric === "participants"} onClick={() => setActiveMetric("participants")} />
+          <MetricCard title="Total Waitlist" value="12.4k" change="0.4x" trend="up" icon={TrendingUp} isActive={activeMetric === "growth"} onClick={() => setActiveMetric("growth")} />
+          <MetricCard title="Conversion Rate" value="1.7%" change="215 / 12.4K" trend="neutral" icon={BarChart3} isActive={activeMetric === "conversion"} onClick={() => setActiveMetric("conversion")} />
+        </div>
+
+        {activeMetric === "revenue" && (
+          <Panel title="Monthly Revenue (2025)" subtitle="Revenue vs target, SAR">
+            <div className="h-72 w-full">
+              <ResponsiveContainer>
+                <BarChart data={monthlyRevenue}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                  <XAxis dataKey="month" stroke="var(--muted-foreground)" fontSize={12} />
+                  <YAxis stroke="var(--muted-foreground)" fontSize={12} tickFormatter={(v) => `${v / 1000}k`} />
+                  <Tooltip formatter={(v: number) => SAR(v)} contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 8 }} />
+                  <Legend />
+                  <Bar dataKey="target" fill="var(--muted-foreground)" name="Target" radius={[4, 4, 0, 0]} opacity={0.4} />
+                  <Bar dataKey="revenue" fill="var(--brand)" name="Revenue" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </Panel>
+        )}
+
+        {activeMetric === "participants" && (
+          <Panel title="Total Participants Over Time" subtitle="New signups vs target">
+            <div className="h-72 w-full">
+              <ResponsiveContainer>
+                <LineChart data={monthlyRevenue.map(d => ({ month: d.month, participants: Math.floor(d.revenue / 1200) }))}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                  <XAxis dataKey="month" stroke="var(--muted-foreground)" fontSize={12} />
+                  <YAxis stroke="var(--muted-foreground)" fontSize={12} />
+                  <Tooltip contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 8 }} />
+                  <Legend />
+                  <Line type="monotone" dataKey="participants" stroke="var(--brand)" strokeWidth={3} name="Participants" />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </Panel>
+        )}
+
+        {activeMetric === "avg_revenue" && (
+          <Panel title="Average Revenue per User" subtitle="Monthly trend">
+            <div className="h-72 w-full">
+              <ResponsiveContainer>
+                <LineChart data={monthlyRevenue.map(d => ({ month: d.month, avg: Math.floor(d.revenue / (d.revenue / 1200)) }))}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                  <XAxis dataKey="month" stroke="var(--muted-foreground)" fontSize={12} />
+                  <YAxis stroke="var(--muted-foreground)" fontSize={12} />
+                  <Tooltip formatter={(v: number) => SAR(v)} contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 8 }} />
+                  <Legend />
+                  <Line type="monotone" dataKey="avg" stroke="var(--brand)" strokeWidth={3} name="Avg Revenue" />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </Panel>
+        )}
+
+        {activeMetric === "growth" && (
+          <Panel title="Growth & ROAS" subtitle="Return on Ad Spend multiplier">
+            <div className="h-72 w-full">
+              <ResponsiveContainer>
+                <BarChart data={monthlyRevenue.map((d, i) => ({ month: d.month, roas: 1.5 + (i * 0.15) }))}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                  <XAxis dataKey="month" stroke="var(--muted-foreground)" fontSize={12} />
+                  <YAxis stroke="var(--muted-foreground)" fontSize={12} />
+                  <Tooltip formatter={(v: number) => `${v.toFixed(1)}x`} contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 8 }} />
+                  <Legend />
+                  <Bar dataKey="roas" fill="var(--brand)" name="ROAS" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </Panel>
+        )}
+
+        {activeMetric === "conversion" && (
+          <Panel title="Conversion Rate" subtitle="Percentage of inquiries converted">
+            <div className="h-72 w-full">
+              <ResponsiveContainer>
+                <LineChart data={monthlyRevenue.map((d, i) => ({ month: d.month, rate: 1.2 + (i * 0.05) }))}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                  <XAxis dataKey="month" stroke="var(--muted-foreground)" fontSize={12} />
+                  <YAxis stroke="var(--muted-foreground)" fontSize={12} />
+                  <Tooltip formatter={(v: number) => `${v.toFixed(1)}%`} contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 8 }} />
+                  <Legend />
+                  <Line type="monotone" dataKey="rate" stroke="var(--brand)" strokeWidth={3} name="Conversion Rate (%)" />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </Panel>
+        )}
 
         <Panel title="Enrolment Funnel" subtitle="From inquiry to completion">
           <div className="h-72 w-full">
@@ -84,6 +197,66 @@ function ReportsPage() {
             </ResponsiveContainer>
           </div>
         </Panel>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Panel title="Fee and Payment Breakdown" subtitle="Distribution of collected amounts">
+            <div className="h-64 w-full">
+              <ResponsiveContainer>
+                <PieChart>
+                  <Pie
+                    data={[
+                      { name: "AS Paid", value: 45000 },
+                      { name: "JS Paid", value: 72000 },
+                      { name: "VAT", value: 17550 },
+                      { name: "SignUp", value: 12000 },
+                    ]}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={50}
+                    outerRadius={80}
+                    label
+                  >
+                    {[0, 1, 2, 3].map((_, i) => (
+                      <Cell key={i} fill={["#0d5026ff", "#408a5bff", "#443c26ff", "#352c4bff"][i % 4]} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(v: number) => SAR(v)} contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 8 }} />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </Panel>
+
+          <Panel title="Revenue by Location" subtitle="Jeddah vs Riyadh">
+            <div className="h-64 w-full">
+              <ResponsiveContainer>
+                <PieChart>
+                  <Pie
+                    data={[
+                      { name: "Jeddah", value: 135400 },
+                      { name: "Riyadh", value: 105500 },
+                    ]}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={50}
+                    outerRadius={80}
+                    label
+                  >
+                    {[0, 1].map((_, i) => (
+                      <Cell key={i} fill={["#204920ff", "#2d5f68ff"][i % 2]} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(v: number) => SAR(v)} contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 8 }} />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </Panel>
+        </div>
       </div>
     </>
   );

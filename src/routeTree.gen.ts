@@ -26,10 +26,12 @@ import { Route as FinanceIndexRouteImport } from './routes/finance.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as StaffSquadRouteImport } from './routes/staff.squad'
 import { Route as StaffSessionsRouteImport } from './routes/staff.sessions'
+import { Route as StaffReportsRouteImport } from './routes/staff.reports'
 import { Route as StaffDashboardRouteImport } from './routes/staff.dashboard'
 import { Route as StaffAttendanceRouteImport } from './routes/staff.attendance'
 import { Route as LocationManagerWaitlistRouteImport } from './routes/location-manager.waitlist'
 import { Route as LocationManagerSessionsRouteImport } from './routes/location-manager.sessions'
+import { Route as LocationManagerReportsRouteImport } from './routes/location-manager.reports'
 import { Route as LocationManagerParticipantsRouteImport } from './routes/location-manager.participants'
 import { Route as LocationManagerEnrolmentsRouteImport } from './routes/location-manager.enrolments'
 import { Route as LocationManagerDashboardRouteImport } from './routes/location-manager.dashboard'
@@ -142,6 +144,11 @@ const StaffSessionsRoute = StaffSessionsRouteImport.update({
   path: '/sessions',
   getParentRoute: () => StaffRoute,
 } as any)
+const StaffReportsRoute = StaffReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => StaffRoute,
+} as any)
 const StaffDashboardRoute = StaffDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -160,6 +167,11 @@ const LocationManagerWaitlistRoute = LocationManagerWaitlistRouteImport.update({
 const LocationManagerSessionsRoute = LocationManagerSessionsRouteImport.update({
   id: '/sessions',
   path: '/sessions',
+  getParentRoute: () => LocationManagerRoute,
+} as any)
+const LocationManagerReportsRoute = LocationManagerReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
   getParentRoute: () => LocationManagerRoute,
 } as any)
 const LocationManagerParticipantsRoute =
@@ -332,10 +344,12 @@ export interface FileRoutesByFullPath {
   '/location-manager/dashboard': typeof LocationManagerDashboardRoute
   '/location-manager/enrolments': typeof LocationManagerEnrolmentsRoute
   '/location-manager/participants': typeof LocationManagerParticipantsRoute
+  '/location-manager/reports': typeof LocationManagerReportsRoute
   '/location-manager/sessions': typeof LocationManagerSessionsRoute
   '/location-manager/waitlist': typeof LocationManagerWaitlistRoute
   '/staff/attendance': typeof StaffAttendanceRoute
   '/staff/dashboard': typeof StaffDashboardRoute
+  '/staff/reports': typeof StaffReportsRoute
   '/staff/sessions': typeof StaffSessionsRoute
   '/staff/squad': typeof StaffSquadRoute
   '/admin/': typeof AdminIndexRoute
@@ -376,10 +390,12 @@ export interface FileRoutesByTo {
   '/location-manager/dashboard': typeof LocationManagerDashboardRoute
   '/location-manager/enrolments': typeof LocationManagerEnrolmentsRoute
   '/location-manager/participants': typeof LocationManagerParticipantsRoute
+  '/location-manager/reports': typeof LocationManagerReportsRoute
   '/location-manager/sessions': typeof LocationManagerSessionsRoute
   '/location-manager/waitlist': typeof LocationManagerWaitlistRoute
   '/staff/attendance': typeof StaffAttendanceRoute
   '/staff/dashboard': typeof StaffDashboardRoute
+  '/staff/reports': typeof StaffReportsRoute
   '/staff/sessions': typeof StaffSessionsRoute
   '/staff/squad': typeof StaffSquadRoute
   '/admin': typeof AdminIndexRoute
@@ -426,10 +442,12 @@ export interface FileRoutesById {
   '/location-manager/dashboard': typeof LocationManagerDashboardRoute
   '/location-manager/enrolments': typeof LocationManagerEnrolmentsRoute
   '/location-manager/participants': typeof LocationManagerParticipantsRoute
+  '/location-manager/reports': typeof LocationManagerReportsRoute
   '/location-manager/sessions': typeof LocationManagerSessionsRoute
   '/location-manager/waitlist': typeof LocationManagerWaitlistRoute
   '/staff/attendance': typeof StaffAttendanceRoute
   '/staff/dashboard': typeof StaffDashboardRoute
+  '/staff/reports': typeof StaffReportsRoute
   '/staff/sessions': typeof StaffSessionsRoute
   '/staff/squad': typeof StaffSquadRoute
   '/admin/': typeof AdminIndexRoute
@@ -477,10 +495,12 @@ export interface FileRouteTypes {
     | '/location-manager/dashboard'
     | '/location-manager/enrolments'
     | '/location-manager/participants'
+    | '/location-manager/reports'
     | '/location-manager/sessions'
     | '/location-manager/waitlist'
     | '/staff/attendance'
     | '/staff/dashboard'
+    | '/staff/reports'
     | '/staff/sessions'
     | '/staff/squad'
     | '/admin/'
@@ -521,10 +541,12 @@ export interface FileRouteTypes {
     | '/location-manager/dashboard'
     | '/location-manager/enrolments'
     | '/location-manager/participants'
+    | '/location-manager/reports'
     | '/location-manager/sessions'
     | '/location-manager/waitlist'
     | '/staff/attendance'
     | '/staff/dashboard'
+    | '/staff/reports'
     | '/staff/sessions'
     | '/staff/squad'
     | '/admin'
@@ -570,10 +592,12 @@ export interface FileRouteTypes {
     | '/location-manager/dashboard'
     | '/location-manager/enrolments'
     | '/location-manager/participants'
+    | '/location-manager/reports'
     | '/location-manager/sessions'
     | '/location-manager/waitlist'
     | '/staff/attendance'
     | '/staff/dashboard'
+    | '/staff/reports'
     | '/staff/sessions'
     | '/staff/squad'
     | '/admin/'
@@ -722,6 +746,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StaffSessionsRouteImport
       parentRoute: typeof StaffRoute
     }
+    '/staff/reports': {
+      id: '/staff/reports'
+      path: '/reports'
+      fullPath: '/staff/reports'
+      preLoaderRoute: typeof StaffReportsRouteImport
+      parentRoute: typeof StaffRoute
+    }
     '/staff/dashboard': {
       id: '/staff/dashboard'
       path: '/dashboard'
@@ -748,6 +779,13 @@ declare module '@tanstack/react-router' {
       path: '/sessions'
       fullPath: '/location-manager/sessions'
       preLoaderRoute: typeof LocationManagerSessionsRouteImport
+      parentRoute: typeof LocationManagerRoute
+    }
+    '/location-manager/reports': {
+      id: '/location-manager/reports'
+      path: '/reports'
+      fullPath: '/location-manager/reports'
+      preLoaderRoute: typeof LocationManagerReportsRouteImport
       parentRoute: typeof LocationManagerRoute
     }
     '/location-manager/participants': {
@@ -1026,6 +1064,7 @@ interface LocationManagerRouteChildren {
   LocationManagerDashboardRoute: typeof LocationManagerDashboardRoute
   LocationManagerEnrolmentsRoute: typeof LocationManagerEnrolmentsRoute
   LocationManagerParticipantsRoute: typeof LocationManagerParticipantsRoute
+  LocationManagerReportsRoute: typeof LocationManagerReportsRoute
   LocationManagerSessionsRoute: typeof LocationManagerSessionsRoute
   LocationManagerWaitlistRoute: typeof LocationManagerWaitlistRoute
   LocationManagerIndexRoute: typeof LocationManagerIndexRoute
@@ -1036,6 +1075,7 @@ const LocationManagerRouteChildren: LocationManagerRouteChildren = {
   LocationManagerDashboardRoute: LocationManagerDashboardRoute,
   LocationManagerEnrolmentsRoute: LocationManagerEnrolmentsRoute,
   LocationManagerParticipantsRoute: LocationManagerParticipantsRoute,
+  LocationManagerReportsRoute: LocationManagerReportsRoute,
   LocationManagerSessionsRoute: LocationManagerSessionsRoute,
   LocationManagerWaitlistRoute: LocationManagerWaitlistRoute,
   LocationManagerIndexRoute: LocationManagerIndexRoute,
@@ -1048,6 +1088,7 @@ const LocationManagerRouteWithChildren = LocationManagerRoute._addFileChildren(
 interface StaffRouteChildren {
   StaffAttendanceRoute: typeof StaffAttendanceRoute
   StaffDashboardRoute: typeof StaffDashboardRoute
+  StaffReportsRoute: typeof StaffReportsRoute
   StaffSessionsRoute: typeof StaffSessionsRoute
   StaffSquadRoute: typeof StaffSquadRoute
   StaffIndexRoute: typeof StaffIndexRoute
@@ -1056,6 +1097,7 @@ interface StaffRouteChildren {
 const StaffRouteChildren: StaffRouteChildren = {
   StaffAttendanceRoute: StaffAttendanceRoute,
   StaffDashboardRoute: StaffDashboardRoute,
+  StaffReportsRoute: StaffReportsRoute,
   StaffSessionsRoute: StaffSessionsRoute,
   StaffSquadRoute: StaffSquadRoute,
   StaffIndexRoute: StaffIndexRoute,

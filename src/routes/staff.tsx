@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { LayoutDashboard, Users, Calendar, ClipboardCheck } from "lucide-react";
+import { LayoutDashboard, Users, Calendar, ClipboardCheck, BarChart3 } from "lucide-react";
 import { SidebarLayout } from "@/components/SidebarLayout";
 
 const navItems = [
@@ -7,6 +7,8 @@ const navItems = [
   { label: "My Squad", to: "/staff/squad", icon: Users },
   { label: "Sessions", to: "/staff/sessions", icon: Calendar },
   { label: "Attendance", to: "/staff/attendance", icon: ClipboardCheck },
+  { label: "Report", to: "/staff/reports", icon: BarChart3 },
+
 ];
 
 export const Route = createFileRoute("/staff")({
