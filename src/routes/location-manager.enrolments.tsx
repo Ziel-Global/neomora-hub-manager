@@ -177,15 +177,16 @@ function EnrolmentsPage() {
         return p ? p.fullName : r.participantId;
       },
     },
-    {
-      key: "session", header: "Session",
-      render: (r) => sessions.find((s) => s.id === r.sessionId)?.name ?? r.sessionId,
-    },
+
     {
       key: "contactnumber", header: "Contact Number", render: (r) => {
         const p = participants.find((part) => part.id === r.participantId);
         return p ? p.contactNumber : "";
       }
+    },
+    {
+      key: "session", header: "Session",
+      render: (r) => sessions.find((s) => s.id === r.sessionId)?.name ?? r.sessionId,
     },
     { key: "day", header: "Day" },
     {
@@ -253,13 +254,12 @@ function EnrolmentsPage() {
                 <SelectTrigger className="w-[180px]"><SelectValue placeholder="Session" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Sessions</SelectItem>
-                  {sessions.map((s) => (
-                    <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
-                  ))}
+                  <SelectItem value="4.30 - 5.30 PM">4:30 to 5:30 PM</SelectItem>
+                  <SelectItem value="5.45 - 7 PM">5:45 to 7:00 PM</SelectItem>
                 </SelectContent>
               </Select>
 
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
+              {/* <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger className="w-[150px]"><SelectValue placeholder="Status" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Status</SelectItem>
@@ -267,10 +267,38 @@ function EnrolmentsPage() {
                   <SelectItem value="pending">Pending</SelectItem>
                   <SelectItem value="overdue">Overdue</SelectItem>
                 </SelectContent>
-              </Select>
+              </Select> */}
             </div>
           }
         />
+        {/* Pagination */}
+        <div className="flex items-center justify-between px-1 mt-4">
+          <p className="text-sm text-muted-foreground">
+            Showing {filtered.length === 0 ? 0 : (page - 1) * pageSize + 1}–
+            {Math.min(page * pageSize, filtered.length)} of {filtered.length}
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              disabled={page <= 1}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <span className="text-sm">
+              Page {page} of {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="icon"
+              disabled={page >= totalPages}
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
       </div>
 
       {/* ── Detail Drawer with tabs ── */}

@@ -33,6 +33,7 @@ const mapStatus = (s: string) => (["Inquiry", "Documents Pending", "Fee Pending"
 
 function ParticipantsPage() {
   const base = useMemo(() => mockParticipants.filter((p) => p.location === RIYADH_NAME), []);
+  const [dayFilter, setDayFilter] = useState("all");
   const [sesFilter, setSesFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [search, setSearch] = useState("");
@@ -44,6 +45,7 @@ function ParticipantsPage() {
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
     return base.filter((p) => {
+      if (dayFilter !== "all" && p.day.toUpperCase() !== dayFilter.toUpperCase()) return false;
       if (sesFilter !== "all" && p.session !== sesFilter) return false;
       if (statusFilter !== "all" && p.status !== statusFilter) return false;
       if (q) {
@@ -52,9 +54,9 @@ function ParticipantsPage() {
       }
       return true;
     });
-  }, [base, sesFilter, statusFilter, search]);
+  }, [base, dayFilter, sesFilter, statusFilter, search]);
 
-  useEffect(() => { setPage(1); }, [sesFilter, statusFilter, search]);
+  useEffect(() => { setPage(1); }, [dayFilter, sesFilter, statusFilter, search]);
   const DAYS = ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "SATURDAY"];
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
@@ -82,8 +84,11 @@ function ParticipantsPage() {
     },
     { key: "dob", header: "DOB" },
     { key: "session", header: "Session" },
+    { key: "day", header: "Day" },
+
     { key: "status", header: "Status", render: (r) => <StatusBadge status={mapStatus(r.status)} /> },
     { key: "guardianPhone", header: "Contact Number" },
+
     {
       key: "actions", header: "Actions",
       render: (r) => (
@@ -98,10 +103,9 @@ function ParticipantsPage() {
   const filters = (
     <>
       {/* <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search…" className="w-[200px]" /> */}
-      <Select value={sesFilter} onValueChange={setSesFilter}>
-        <SelectTrigger className="w-[160px]"><SelectValue placeholder="Session" /></SelectTrigger>
+      <Select value={dayFilter} onValueChange={setDayFilter}>
+        <SelectTrigger className="w-[160px]"><SelectValue placeholder="Day" /></SelectTrigger>
         <SelectContent>
-          {/* {sessionsHere.map((s) => <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>)} */}
           <SelectItem value="all">All DAYS</SelectItem>
           <SelectItem value="sunday">SUNDAY</SelectItem>
           <SelectItem value="monday">MONDAY</SelectItem>
@@ -109,7 +113,6 @@ function ParticipantsPage() {
           <SelectItem value="wednesday">WEDNESDAY</SelectItem>
           <SelectItem value="thursday">THURSDAY</SelectItem>
           <SelectItem value="saturday">SATURDAY</SelectItem>
-
         </SelectContent>
       </Select>
       <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -123,9 +126,8 @@ function ParticipantsPage() {
         <SelectTrigger className="w-[160px]"><SelectValue placeholder="Session" /></SelectTrigger>
         <SelectContent>
           <SelectItem value="all">All Session</SelectItem>
-          <SelectItem value="sunday">4:30 to 5:30 PM</SelectItem>
-          <SelectItem value="monday">5:45 to 7:00 PM</SelectItem>
-
+          <SelectItem value="4.30 - 5.30 PM">4:30 to 5:30 PM</SelectItem>
+          <SelectItem value="5.45 - 7 PM">5:45 to 7:00 PM</SelectItem>
         </SelectContent>
       </Select>
     </>

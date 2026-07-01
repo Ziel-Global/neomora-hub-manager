@@ -11,10 +11,12 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as StaffRouteImport } from './routes/staff'
 import { Route as RegistrationFormRouteImport } from './routes/registration-form'
+import { Route as PortalOptionsRouteImport } from './routes/portal-options'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LocationManagerRouteImport } from './routes/location-manager'
 import { Route as GuardianRouteImport } from './routes/guardian'
 import { Route as FinanceRouteImport } from './routes/finance'
+import { Route as DocumentsRouteImport } from './routes/documents'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as StaffIndexRouteImport } from './routes/staff.index'
@@ -65,6 +67,11 @@ const RegistrationFormRoute = RegistrationFormRouteImport.update({
   path: '/registration-form',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PortalOptionsRoute = PortalOptionsRouteImport.update({
+  id: '/portal-options',
+  path: '/portal-options',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -83,6 +90,11 @@ const GuardianRoute = GuardianRouteImport.update({
 const FinanceRoute = FinanceRouteImport.update({
   id: '/finance',
   path: '/finance',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DocumentsRoute = DocumentsRouteImport.update({
+  id: '/documents',
+  path: '/documents',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -291,10 +303,12 @@ const GuardianPaymentsPayInvoiceIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/documents': typeof DocumentsRoute
   '/finance': typeof FinanceRouteWithChildren
   '/guardian': typeof GuardianRouteWithChildren
   '/location-manager': typeof LocationManagerRouteWithChildren
   '/login': typeof LoginRoute
+  '/portal-options': typeof PortalOptionsRoute
   '/registration-form': typeof RegistrationFormRoute
   '/staff': typeof StaffRouteWithChildren
   '/admin/access': typeof AdminAccessRoute
@@ -337,7 +351,9 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/documents': typeof DocumentsRoute
   '/login': typeof LoginRoute
+  '/portal-options': typeof PortalOptionsRoute
   '/registration-form': typeof RegistrationFormRoute
   '/admin/access': typeof AdminAccessRoute
   '/admin/dashboard': typeof AdminDashboardRoute
@@ -381,10 +397,12 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/documents': typeof DocumentsRoute
   '/finance': typeof FinanceRouteWithChildren
   '/guardian': typeof GuardianRouteWithChildren
   '/location-manager': typeof LocationManagerRouteWithChildren
   '/login': typeof LoginRoute
+  '/portal-options': typeof PortalOptionsRoute
   '/registration-form': typeof RegistrationFormRoute
   '/staff': typeof StaffRouteWithChildren
   '/admin/access': typeof AdminAccessRoute
@@ -430,10 +448,12 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/documents'
     | '/finance'
     | '/guardian'
     | '/location-manager'
     | '/login'
+    | '/portal-options'
     | '/registration-form'
     | '/staff'
     | '/admin/access'
@@ -476,7 +496,9 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/documents'
     | '/login'
+    | '/portal-options'
     | '/registration-form'
     | '/admin/access'
     | '/admin/dashboard'
@@ -519,10 +541,12 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
+    | '/documents'
     | '/finance'
     | '/guardian'
     | '/location-manager'
     | '/login'
+    | '/portal-options'
     | '/registration-form'
     | '/staff'
     | '/admin/access'
@@ -567,10 +591,12 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
+  DocumentsRoute: typeof DocumentsRoute
   FinanceRoute: typeof FinanceRouteWithChildren
   GuardianRoute: typeof GuardianRouteWithChildren
   LocationManagerRoute: typeof LocationManagerRouteWithChildren
   LoginRoute: typeof LoginRoute
+  PortalOptionsRoute: typeof PortalOptionsRoute
   RegistrationFormRoute: typeof RegistrationFormRoute
   StaffRoute: typeof StaffRouteWithChildren
 }
@@ -589,6 +615,13 @@ declare module '@tanstack/react-router' {
       path: '/registration-form'
       fullPath: '/registration-form'
       preLoaderRoute: typeof RegistrationFormRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/portal-options': {
+      id: '/portal-options'
+      path: '/portal-options'
+      fullPath: '/portal-options'
+      preLoaderRoute: typeof PortalOptionsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -617,6 +650,13 @@ declare module '@tanstack/react-router' {
       path: '/finance'
       fullPath: '/finance'
       preLoaderRoute: typeof FinanceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/documents': {
+      id: '/documents'
+      path: '/documents'
+      fullPath: '/documents'
+      preLoaderRoute: typeof DocumentsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -1026,10 +1066,12 @@ const StaffRouteWithChildren = StaffRoute._addFileChildren(StaffRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
+  DocumentsRoute: DocumentsRoute,
   FinanceRoute: FinanceRouteWithChildren,
   GuardianRoute: GuardianRouteWithChildren,
   LocationManagerRoute: LocationManagerRouteWithChildren,
   LoginRoute: LoginRoute,
+  PortalOptionsRoute: PortalOptionsRoute,
   RegistrationFormRoute: RegistrationFormRoute,
   StaffRoute: StaffRouteWithChildren,
 }

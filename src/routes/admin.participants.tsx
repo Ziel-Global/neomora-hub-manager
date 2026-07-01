@@ -698,6 +698,8 @@ function ParticipantsPage() {
         actions={
           <>
             <Button variant="outline"><Download className="mr-2 h-4 w-4" /> Export</Button>
+            <Button variant="outline" onClick={() => window.open('/portal-options', '_blank')}>Portal Options</Button>
+
             <Button onClick={() => setAddOpen(true)}>Add Participant</Button>
           </>
         }
