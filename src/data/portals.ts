@@ -17,5 +17,5 @@ export const PORTALS: Portal[] = [
   { key: "location-manager", name: "Location Manager", shortName: "Manager", description: "Run day-to-day operations for your academy location.", icon: Building2, path: "/location-manager" },
   { key: "finance", name: "Finance Officer", shortName: "Finance", description: "Track invoices, payments, refunds, and revenue.", icon: DollarSign, path: "/finance" },
   { key: "guardian", name: "Parent / Guardian", shortName: "Guardian", description: "Manage your children's enrolment, fees, and sessions.", icon: Users, path: "/guardian" },
-  { key: "staff", name: "Staff / Coach", shortName: "Coach", description: "View schedule, take attendance, and log session notes.", icon: Trophy, path: "/staff" },
+  { key: "staff", name: "Coach", shortName: "Coach", description: "View schedule, take attendance, and log session notes.", icon: Trophy, path: "/staff" },
 ];
