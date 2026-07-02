@@ -68,7 +68,7 @@ function ReportsPage() {
         </div>
 
         {activeMetric === "revenue" && (
-          <Panel title="Monthly Revenue (2025)" subtitle="Revenue vs target, SAR">
+          <Panel title="Total Revenue (2025)" subtitle="">
             <div className="h-72 w-full">
               <ResponsiveContainer>
                 <BarChart data={monthlyRevenue}>
@@ -86,7 +86,7 @@ function ReportsPage() {
         )}
 
         {activeMetric === "participants" && (
-          <Panel title="Total Participants Over Time" subtitle="New signups vs target">
+          <Panel title="Total Enrolled Partcipants" subtitle="">
             <div className="h-72 w-full">
               <ResponsiveContainer>
                 <LineChart data={monthlyRevenue.map(d => ({ month: d.month, participants: Math.floor(d.revenue / 1200) }))}>
@@ -103,7 +103,7 @@ function ReportsPage() {
         )}
 
         {activeMetric === "avg_revenue" && (
-          <Panel title="Average Revenue per User" subtitle="Monthly trend">
+          <Panel title="Average Revenue per User" subtitle="">
             <div className="h-72 w-full">
               <ResponsiveContainer>
                 <LineChart data={monthlyRevenue.map(d => ({ month: d.month, avg: Math.floor(d.revenue / (d.revenue / 1200)) }))}>
@@ -120,7 +120,7 @@ function ReportsPage() {
         )}
 
         {activeMetric === "growth" && (
-          <Panel title="Growth & ROAS" subtitle="Return on Ad Spend multiplier">
+          <Panel title="Total Waitlist" subtitle="">
             <div className="h-72 w-full">
               <ResponsiveContainer>
                 <BarChart data={monthlyRevenue.map((d, i) => ({ month: d.month, roas: 1.5 + (i * 0.15) }))}>
@@ -129,7 +129,7 @@ function ReportsPage() {
                   <YAxis stroke="var(--muted-foreground)" fontSize={12} />
                   <Tooltip formatter={(v: number) => `${v.toFixed(1)}x`} contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 8 }} />
                   <Legend />
-                  <Bar dataKey="roas" fill="var(--brand)" name="ROAS" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="roas" fill="var(--brand)" name="Waitlist" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -137,7 +137,7 @@ function ReportsPage() {
         )}
 
         {activeMetric === "conversion" && (
-          <Panel title="Conversion Rate" subtitle="Percentage of inquiries converted">
+          <Panel title="Monthly Growth" subtitle="">
             <div className="h-72 w-full">
               <ResponsiveContainer>
                 <LineChart data={monthlyRevenue.map((d, i) => ({ month: d.month, rate: 1.2 + (i * 0.05) }))}>
@@ -146,7 +146,7 @@ function ReportsPage() {
                   <YAxis stroke="var(--muted-foreground)" fontSize={12} />
                   <Tooltip formatter={(v: number) => `${v.toFixed(1)}%`} contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 8 }} />
                   <Legend />
-                  <Line type="monotone" dataKey="rate" stroke="var(--brand)" strokeWidth={3} name="Conversion Rate (%)" />
+                  <Line type="monotone" dataKey="rate" stroke="var(--brand)" strokeWidth={3} name="Monthly Growth (%)" />
                 </LineChart>
               </ResponsiveContainer>
             </div>
