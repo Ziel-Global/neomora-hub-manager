@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Download, Users, DollarSign, Activity, TrendingUp, BarChart3, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid, Cell,
-  LineChart, Line, PieChart, Pie
+  LineChart, Line, PieChart, Pie, AreaChart, Area
 } from "recharts";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -51,7 +51,54 @@ function ReportsPage() {
     const drop = prev === 0 ? 0 : Math.round(((prev - f.count) / prev) * 100);
     return { ...f, drop: i === 0 ? 0 : drop };
   });
+// Revenue vs Target variance
+  const varianceData = monthlyRevenue.map(d => ({
+    month: d.month,
+    variance: d.revenue - d.target,
+  }));
 
+  // Cumulative revenue
+  let runningTotal = 0;
+  const cumulativeData = monthlyRevenue.map(d => {
+    runningTotal += d.revenue;
+    return { month: d.month, cumulative: runningTotal };
+  });
+
+  // Capacity utilization %
+  const utilizationData = capacityData.map(c => ({
+    location: c.location,
+    utilization: Math.round((c.enrolled / c.capacity) * 100),
+  }));
+
+  // Overall funnel conversion (first stage vs last stage)
+  const funnelStart = funnelData[0]?.count ?? 0;
+  const funnelEnd = funnelData[funnelData.length - 1]?.count ?? 0;
+  const conversionData = [
+    { name: "Converted", value: funnelEnd },
+    { name: "Lost", value: Math.max(funnelStart - funnelEnd, 0) },
+  ];
+
+  // Payment method % share (same source as existing bar chart)
+  const paymentMethods = [
+    { method: "Bank Transfer", amount: 154000 },
+    { method: "Card", amount: 62000 },
+    { method: "Cash", amount: 24900 },
+  ];
+  // Boys vs Girls registration (confirmed counts from register sheet)
+  const registrationData = [
+    { group: "U6", count: 32, type: "Boys" },
+    { group: "U12", count: 32, type: "Boys" },
+    { group: "Girls", count: 27, type: "Girls" },
+  ];
+
+  // Enquiries - sample/placeholder data, replace with real Customer Enquiries sheet data
+  const enquiriesData = [
+    { week: "Week 1", enquiries: 18 },
+    { week: "Week 2", enquiries: 24 },
+    { week: "Week 3", enquiries: 15 },
+    { week: "Week 4", enquiries: 30 },
+    { week: "Week 5", enquiries: 22 },
+  ];
   return (
     <>
       <PageHeader title="Reports" />
@@ -197,6 +244,161 @@ function ReportsPage() {
             </ResponsiveContainer>
           </div>
         </Panel>
+           <Panel title="Payment Methods" subtitle="Revenue collected by payment type">
+                  <div className="h-64 w-full">
+                    <ResponsiveContainer>
+                      <BarChart 
+                        data={[
+                          { method: "Bank Transfer", amount: 154000 },
+                          { method: "Card", amount: 62000 },
+                          { method: "Cash", amount: 24900 },
+                        ]} 
+                        layout="vertical" 
+                        margin={{ left: 40 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                        <XAxis type="number" stroke="var(--muted-foreground)" fontSize={12} tickFormatter={(v) => `${v / 1000}k`} />
+                        <YAxis type="category" dataKey="method" stroke="var(--muted-foreground)" fontSize={12} width={100} />
+                        <Tooltip formatter={(v: number) => SAR(v)} contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 8 }} />
+                        <Legend />
+                        <Bar dataKey="amount" fill="var(--brand)" name="Collected (SAR)" radius={[0, 4, 4, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </Panel>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Panel title="Revenue vs Target Variance" subtitle="Kitna target se upar ya neechy">
+            <div className="h-64 w-full">
+              <ResponsiveContainer>
+                <BarChart data={varianceData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                  <XAxis dataKey="month" stroke="var(--muted-foreground)" fontSize={12} />
+                  <YAxis stroke="var(--muted-foreground)" fontSize={12} tickFormatter={(v) => `${v / 1000}k`} />
+                  <Tooltip formatter={(v: number) => SAR(v)} contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 8 }} />
+                  <Bar dataKey="variance" name="Variance" radius={[4, 4, 0, 0]}>
+                    {varianceData.map((d, i) => (
+                      <Cell key={i} fill={d.variance >= 0 ? "var(--brand)" : "#ef4444"} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </Panel>
+
+          <Panel title="Cumulative Revenue Growth" subtitle="Running total over the year">
+            <div className="h-64 w-full">
+              <ResponsiveContainer>
+                <AreaChart data={cumulativeData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                  <XAxis dataKey="month" stroke="var(--muted-foreground)" fontSize={12} />
+                  <YAxis stroke="var(--muted-foreground)" fontSize={12} tickFormatter={(v) => `${v / 1000}k`} />
+                  <Tooltip formatter={(v: number) => SAR(v)} contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 8 }} />
+                  <Area type="monotone" dataKey="cumulative" stroke="var(--brand)" fill="var(--brand)" fillOpacity={0.25} name="Cumulative Revenue" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </Panel>
+        </div>
+
+     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+         <Panel title="Boys vs Girls Registration" subtitle="U8 & U14/16 not yet counted">
+  <div className="h-64 w-full">
+    <ResponsiveContainer>
+      <BarChart data={registrationData} barCategoryGap="40%">
+        <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+        <XAxis dataKey="group" stroke="var(--muted-foreground)" fontSize={12} />
+        <YAxis stroke="var(--muted-foreground)" fontSize={12} />
+        <Tooltip contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 8 }} />
+        <Bar dataKey="count" name="Registered" radius={[4, 4, 0, 0]} barSize={100}>
+          {registrationData.map((d, i) => (
+            <Cell key={i} fill={d.type === "Girls" ? "var(--brand)" : "var(--brand)"} />
+          ))}
+        </Bar>
+      </BarChart>
+    </ResponsiveContainer>
+  </div>
+</Panel>
+
+          <Panel title="Enquiries" subtitle="Sample data — replace with Customer Enquiries sheet">
+            <div className="h-64 w-full">
+              <ResponsiveContainer>
+                <BarChart data={enquiriesData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                  <XAxis dataKey="week" stroke="var(--muted-foreground)" fontSize={12} />
+                  <YAxis stroke="var(--muted-foreground)" fontSize={12} />
+                  <Tooltip contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 8 }} />
+                  <Bar dataKey="enquiries" fill="var(--brand)" name="Enquiries" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </Panel>
+        </div> 
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Panel title="Capacity Utilization %" subtitle="Enrolled as % of total capacity">
+            <div className="h-64 w-full">
+              <ResponsiveContainer>
+                <BarChart data={utilizationData} layout="vertical" margin={{ left: 30 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                  <XAxis type="number" stroke="var(--muted-foreground)" fontSize={12} tickFormatter={(v) => `${v}%`} domain={[0, 100]} />
+                  <YAxis type="category" dataKey="location" stroke="var(--muted-foreground)" fontSize={12} width={130} />
+                  <Tooltip formatter={(v: number) => `${v}%`} contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 8 }} />
+                  <Bar dataKey="utilization" fill="var(--brand)" name="Utilization %" radius={[0, 4, 4, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </Panel>
+
+          <Panel title="Overall Funnel Conversion" subtitle="Inquiry to completion">
+            <div className="h-64 w-full">
+              <ResponsiveContainer>
+                <PieChart>
+                  <Pie
+                    data={conversionData}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={50}
+                    outerRadius={80}
+                    label
+                  >
+                    <Cell fill="var(--brand)" />
+                    <Cell fill="#ef4444" />
+                  </Pie>
+                  <Tooltip contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 8 }} />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </Panel>
+        </div>
+
+        {/* <Panel title="Payment Method Share" subtitle="% distribution of collected revenue">
+          <div className="h-64 w-full">
+            <ResponsiveContainer>
+              <PieChart>
+                <Pie
+                  data={paymentMethods}
+                  dataKey="amount"
+                  nameKey="method"
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={50}
+                  outerRadius={80}
+                  label={(entry) => `${entry.method} (${Math.round((entry.amount / paymentMethods.reduce((s, p) => s + p.amount, 0)) * 100)}%)`}
+                >
+                  {paymentMethods.map((_, i) => (
+                    <Cell key={i} fill={["#0d5026ff", "#408a5bff", "#443c26ff"][i % 3]} />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(v: number) => SAR(v)} contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 8 }} />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </Panel> */}
+  
+             
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Panel title="Fee and Payment Breakdown" subtitle="Distribution of collected amounts">
