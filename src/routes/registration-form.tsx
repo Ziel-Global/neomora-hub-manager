@@ -143,8 +143,8 @@ function RegistrationFormPage() {
   }
 
   return (
-    <div className="min-h-screen bg-muted/30 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-3xl">
+    <div className="min-h-screen bg-muted/30 py-8 px-4 sm:px-6 lg:px-8 ">
+      <div className="mx-auto max-w-3xl ">
         <div className=" flex items-center justify-center">
           <img src={logoUrl} alt="Neomora" className="h-15 w-auto" />
 
