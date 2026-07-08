@@ -157,7 +157,41 @@ function SessionsPage() {
             <SheetDescription>Schedule a new session.</SheetDescription>
           </SheetHeader>
           <form className="space-y-4 pb-6" onSubmit={(e) => { e.preventDefault(); setAddOpen(false); }}>
-            <Field label="Name"><Input placeholder="e.g. Spring 2026" /></Field>
+            {/* <Field label="Name"><Input placeholder="e.g. Spring 2026" /></Field> */}
+
+
+
+            <Field label="Day">
+              <Select
+              >
+                <SelectTrigger><SelectValue placeholder="Select Day" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="sunday">Sunday</SelectItem>
+                  <SelectItem value="monday">Monday</SelectItem>
+                  <SelectItem value="tuesday">Tuesday</SelectItem>
+                  <SelectItem value="wednesday">Wednesday</SelectItem>
+                  <SelectItem value="thursday">Thursday</SelectItem>
+                  <SelectItem value="saturday">Saturday</SelectItem>
+                </SelectContent>
+              </Select>
+            </Field>
+
+            <Field label="Session Time">
+              <Select
+              >
+                <SelectTrigger><SelectValue placeholder="Select Session" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="sunday">4:30 - 5:30 PM </SelectItem>
+                  <SelectItem value="monday">5:30 - 6:30 PM</SelectItem>
+                  <SelectItem value="tuesday">6:30 - 7:30 PM</SelectItem>
+                  <SelectItem value="wednesday">7:30 - 8:30 PM</SelectItem>
+                  <SelectItem value="thursday">8:30 - 9:30 PM</SelectItem>
+                </SelectContent>
+              </Select>
+            </Field>
+
+
+
             <Field label="Location">
               <Select>
                 <SelectTrigger><SelectValue placeholder="Select location" /></SelectTrigger>
