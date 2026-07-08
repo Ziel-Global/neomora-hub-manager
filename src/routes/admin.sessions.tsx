@@ -38,18 +38,21 @@ function SessionsPage() {
   }, [locFilter, statusFilter]);
 
   const columns: Column<MockSession>[] = [
-    {
-      key: "name", header: "Name", sortable: true,
-      render: (r) => (
-        <button
-          type="button"
-          onClick={() => setSelected(r)}
-          className="font-medium text-foreground hover:text-primary"
-        >
-          {r.name}
-        </button>
-      ),
-    },
+    // {
+    //   key: "name", header: "Name", sortable: true,
+    //   render: (r) => (
+    //     <button
+    //       type="button"
+    //       onClick={() => setSelected(r)}
+    //       className="font-medium text-foreground hover:text-primary"
+    //     >
+    //       {r.name}
+    //     </button>
+    //   ),
+    // },
+    { key: "days", header: "Days", render: (r) => locName(r.days) },
+    { key: "session", header: "Session", render: (r) => locName(r.session) },
+
     { key: "locationId", header: "Location", render: (r) => locName(r.locationId) },
     { key: "startDate", header: "Start Date", sortable: true },
     { key: "endDate", header: "End Date", sortable: true },
@@ -89,7 +92,7 @@ function SessionsPage() {
   );
 
   const enrolledForSelected = selected
-    ? mockParticipants.filter((p) => p.session === selected.name).length
+    ? mockParticipants.filter((p) => p.session === selected.session).length
     : 0;
 
   return (
@@ -108,7 +111,7 @@ function SessionsPage() {
         <DataTable
           data={filtered}
           columns={columns}
-          searchKeys={["name"]}
+          searchKeys={["session"]}
           searchPlaceholder="Search sessions…"
           filters={filters}
         />
@@ -119,7 +122,7 @@ function SessionsPage() {
           {selected && (
             <>
               <SheetHeader>
-                <SheetTitle>{selected.name}</SheetTitle>
+                <SheetTitle>{selected.session}</SheetTitle>
                 <SheetDescription>{locName(selected.locationId)}</SheetDescription>
               </SheetHeader>
               <div className="space-y-5 px-4 pb-6">

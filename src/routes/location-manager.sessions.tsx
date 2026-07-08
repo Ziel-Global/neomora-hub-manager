@@ -12,27 +12,31 @@ import {
 } from "@/components/ui/tooltip";
 import { mockSessions, type MockSession } from "@/data/mockSessions";
 import { mockParticipants } from "@/data/mockParticipants";
-
+import { mockLocations } from "@/data/mockLocations";
 export const Route = createFileRoute("/location-manager/sessions")({
   component: SessionsPage,
 });
 
 const RIYADH_ID = "loc-riy";
 const SAR = (n: number) => `SAR ${n.toLocaleString()}`;
+const locName = (id: string) => mockLocations.find((l) => l.id === id)?.name ?? id;
 
 function SessionsPage() {
   const [selected, setSelected] = useState<MockSession | null>(null);
   const sessions = mockSessions.filter((s) => s.locationId === RIYADH_ID);
 
   const columns: Column<MockSession>[] = [
-    {
-      key: "name", header: "Name", sortable: true,
-      render: (r) => (
-        <button type="button" onClick={() => setSelected(r)} className="font-medium hover:text-primary">
-          {r.name}
-        </button>
-      ),
-    },
+    // {
+    //   key: "name", header: "Name", sortable: true,
+    //   render: (r) => (
+    //     <button type="button" onClick={() => setSelected(r)} className="font-medium hover:text-primary">
+    //       {r.name}
+    //     </button>
+    //   ),
+    // },
+    { key: "days", header: "Days", render: (r) => locName(r.days) },
+    { key: "session", header: "Session", render: (r) => locName(r.session) },
+
     { key: "startDate", header: "Start" },
     { key: "endDate", header: "End" },
     { key: "baseFee", header: "Base Fee", render: (r) => SAR(r.baseFee) },
@@ -64,7 +68,7 @@ function SessionsPage() {
         <DataTable
           data={sessions}
           columns={columns}
-          searchKeys={["name"]}
+          searchKeys={["session"]}
           searchPlaceholder="Search sessions…"
         />
       </div>
@@ -74,7 +78,7 @@ function SessionsPage() {
           {selected && (
             <>
               <SheetHeader>
-                <SheetTitle>{selected.name}</SheetTitle>
+                <SheetTitle>{selected.session}</SheetTitle>
                 <SheetDescription>Riyadh Academy</SheetDescription>
               </SheetHeader>
               <div className="space-y-5 px-4 pb-6">
@@ -87,7 +91,7 @@ function SessionsPage() {
                 <div className="rounded-lg border p-4">
                   <h4 className="mb-3 text-sm font-semibold">Fee breakdown</h4>
                   <Row label="Base fee" value={SAR(selected.baseFee)} />
-                  <Row label="Enrolled" value={mockParticipants.filter((p) => p.session === selected.name).length} />
+                  <Row label="Enrolled" value={mockParticipants.filter((p) => p.session === selected.session).length} />
                   <Row label="Projected revenue" value={SAR(selected.baseFee * selected.enrolledCount)} bold />
                 </div>
               </div>

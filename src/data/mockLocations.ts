@@ -14,7 +14,7 @@ export interface MockLocation {
 export const mockLocations: MockLocation[] = [
   {
     id: "loc-riy",
-    name: "Riyadh Academy",
+    name: "Riyadh",
     city: "Riyadh",
     capacity: 400,
     enrolled: 312,
@@ -24,7 +24,7 @@ export const mockLocations: MockLocation[] = [
   },
   {
     id: "loc-jed",
-    name: "Jeddah Branch",
+    name: "Jeddah",
     city: "Jeddah",
     capacity: 280,
     enrolled: 221,
@@ -32,14 +32,14 @@ export const mockLocations: MockLocation[] = [
     manager: "Sara Al-Harbi",
     createdAt: "2022-09-01",
   },
-  {
-    id: "loc-dmm",
-    name: "Dammam Centre",
-    city: "Dammam",
-    capacity: 200,
-    enrolled: 138,
-    status: "Active",
-    manager: "Faisal Al-Qahtani",
-    createdAt: "2023-06-22",
-  },
+  // {
+  //   id: "loc-dmm",
+  //   name: "Dammam Centre",
+  //   city: "Dammam",
+  //   capacity: 200,
+  //   enrolled: 138,
+  //   status: "Active",
+  //   manager: "Faisal Al-Qahtani",
+  //   createdAt: "2023-06-22",
+  // },
 ];

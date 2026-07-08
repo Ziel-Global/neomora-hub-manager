@@ -19,7 +19,7 @@ const sessionBadge = (s: string) =>
 
 function StaffSessions() {
   const coach = getCoach();
-  const sessions = mockSessions.filter((s) => coach.assignedSessions.includes(s.name));
+  const sessions = mockSessions.filter((s) => coach.assignedSessions.includes(s.session));
   const [selected, setSelected] = useState<MockSession | null>(null);
 
   const participantsIn = (name: string) =>
@@ -39,7 +39,7 @@ function StaffSessions() {
                 className="group rounded-xl border bg-card p-5 text-left shadow-sm transition-all hover:shadow-md"
               >
                 <div className="flex items-start justify-between">
-                  <h3 className="text-base font-semibold">{s.name}</h3>
+                  <h3 className="text-base font-semibold">{s.days} • {s.session}</h3>
                   <StatusBadge status={sessionBadge(s.status)} />
                 </div>
                 <div className="mt-3 space-y-1.5 text-sm text-muted-foreground">
@@ -64,7 +64,7 @@ function StaffSessions() {
           {selected && (
             <>
               <DialogHeader>
-                <DialogTitle>{selected.name}</DialogTitle>
+                <DialogTitle>{selected.days} • {selected.session}</DialogTitle>
                 <DialogDescription>
                   {coach.location} • {selected.startDate} → {selected.endDate}
                 </DialogDescription>
@@ -77,11 +77,11 @@ function StaffSessions() {
                 </div>
                 <div>
                   <h4 className="mb-2 text-sm font-semibold">Participants in this session</h4>
-                  {participantsIn(selected.name).length === 0 ? (
+                  {participantsIn(selected.session).length === 0 ? (
                     <p className="text-sm text-muted-foreground">No squad members in this session.</p>
                   ) : (
                     <ul className="max-h-72 divide-y overflow-y-auto rounded-md border">
-                      {participantsIn(selected.name).map((p) => (
+                      {participantsIn(selected.session).map((p) => (
                         <li key={p.id} className="flex items-center justify-between px-3 py-2 text-sm">
                           <span className="font-medium">{p.fullName}</span>
                           <StatusBadge status={p.status === "On Hold" ? "On Hold" : "Active"} />

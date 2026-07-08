@@ -370,8 +370,8 @@ function FeesPage() {
       />
       <div className="space-y-6 p-6">
         <div className="grid gap-4 md:grid-cols-3">
-          <StatCard label="Total Sign Up" value={SAR(totalSignUp)} icon={Receipt} accent="primary" />
           <StatCard label="Total Collected" value={SAR(totalCollected)} icon={Wallet} accent="success" />
+          <StatCard label="Total Sign Up" value={SAR(totalSignUp)} icon={Receipt} accent="primary" />
           <StatCard label="Total VAT" value={SAR(totalVat)} icon={ReceiptText} accent="danger" />
         </div>
 
