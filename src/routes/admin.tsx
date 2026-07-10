@@ -6,6 +6,7 @@ const navItems = [
   { label: "Dashboard", to: "/admin", icon: LayoutDashboard },
   { label: "Locations", to: "/admin/locations", icon: Building2 },
   { label: "Sessions", to: "/admin/sessions", icon: CalendarDays },
+  { label: "Classes", to: "/admin/classes", icon: CalendarDays },
   { label: "Participants", to: "/admin/participants", icon: Users },
   { label: "Fees & Payments", to: "/admin/fees", icon: CreditCard },
   { label: "Reports", to: "/admin/reports", icon: BarChart3 },

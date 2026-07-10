@@ -1,5 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
+import { Plus, Trash2 } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { DataTable, type Column } from "@/components/DataTable";
 import { StatusBadge } from "@/components/StatusBadge";
@@ -15,6 +15,7 @@ import {
 import { mockSessions, type MockSession } from "@/data/mockSessions";
 import { mockLocations } from "@/data/mockLocations";
 import { mockParticipants } from "@/data/mockParticipants";
+import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/admin/sessions")({
   component: SessionsPage,
@@ -27,7 +28,25 @@ function SessionsPage() {
   const [locFilter, setLocFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [selected, setSelected] = useState<MockSession | null>(null);
+  const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null);
   const [addOpen, setAddOpen] = useState(false);
+
+  // Form State for Add Session
+  const [schedules, setSchedules] = useState<{ id: string; day: string; timings: { id: string; start: string; end: string; ageGroup: string }[] }[]>([]);
+
+  const handleAddDay = () => {
+    setSchedules([...schedules, { id: crypto.randomUUID(), day: "monday", timings: [{ id: crypto.randomUUID(), start: "16:00", end: "17:30", ageGroup: "U8" }] }]);
+  };
+  const handleRemoveDay = (id: string) => setSchedules(schedules.filter(s => s.id !== id));
+  const handleAddTiming = (dayId: string) => {
+    setSchedules(schedules.map(s => s.id === dayId ? { ...s, timings: [...s.timings, { id: crypto.randomUUID(), start: "18:00", end: "19:30", ageGroup: "U8" }] } : s));
+  };
+  const handleRemoveTiming = (dayId: string, timingId: string) => {
+    setSchedules(schedules.map(s => s.id === dayId ? { ...s, timings: s.timings.filter(t => t.id !== timingId) } : s));
+  };
+  const handleUpdateTiming = (dayId: string, timingId: string, field: "start" | "end" | "ageGroup", value: string) => {
+    setSchedules(schedules.map(s => s.id === dayId ? { ...s, timings: s.timings.map(t => t.id === timingId ? { ...t, [field]: value } : t) } : s));
+  };
 
   const filtered = useMemo(() => {
     return mockSessions.filter((s) => {
@@ -37,26 +56,63 @@ function SessionsPage() {
     });
   }, [locFilter, statusFilter]);
 
+  const groupedFiltered = useMemo(() => {
+    const map = new Map<string, MockSession>();
+    filtered.forEach((s) => {
+      if (!map.has(s.name)) {
+        map.set(s.name, s);
+      }
+    });
+    return Array.from(map.values());
+  }, [filtered]);
+
+  const relatedSessions = useMemo(() => {
+    if (!selected) return [];
+    return mockSessions.filter(s => s.name === selected.name);
+  }, [selected]);
+
+  const currentVariant = useMemo(() => {
+    return relatedSessions.find(s => s.id === selectedVariantId) || selected;
+  }, [relatedSessions, selectedVariantId, selected]);
+
   const columns: Column<MockSession>[] = [
+    {
+      key: "name", header: "Name", sortable: true,
+      render: (r) => (
+        <button
+          type="button"
+          onClick={() => setSelected(r)}
+          className="font-medium text-foreground hover:text-primary"
+        >
+          {r.name}
+        </button>
+      ),
+    },
     // {
-    //   key: "name", header: "Name", sortable: true,
-    //   render: (r) => (
-    //     <button
-    //       type="button"
-    //       onClick={() => setSelected(r)}
-    //       className="font-medium text-foreground hover:text-primary"
-    //     >
-    //       {r.name}
-    //     </button>
-    //   ),
+    //   key: "days", header: "Days", render: (r, isExpanded) => {
+    //     const related = filtered.filter(s => s.name === r.name);
+    //     return related.length > 1 ? (
+    //       <span className="inline-flex items-center gap-1 font-medium text-primary">
+    //         Multiple {isExpanded ? <span className="text-xs">▲</span> : <span className="text-xs">▼</span>}
+    //       </span>
+    //     ) : locName(r.days);
+    //   }
     // },
-    { key: "days", header: "Days", render: (r) => locName(r.days) },
-    { key: "session", header: "Session", render: (r) => locName(r.session) },
+    // {
+    //   key: "session", header: "Session Timing", render: (r, isExpanded) => {
+    //     const related = filtered.filter(s => s.name === r.name);
+    //     return related.length > 1 ? (
+    //       <span className="inline-flex items-center gap-1 font-medium text-primary">
+    //         Multiple {isExpanded ? <span className="text-xs">▲</span> : <span className="text-xs">▼</span>}
+    //       </span>
+    //     ) : `${r.session}${r.ageGroup ? ` (${r.ageGroup})` : ""}`;
+    //   }
+    // },
 
     { key: "locationId", header: "Location", render: (r) => locName(r.locationId) },
     { key: "startDate", header: "Start Date", sortable: true },
     { key: "endDate", header: "End Date", sortable: true },
-    { key: "baseFee", header: "Base Fee", render: (r) => SAR(r.baseFee) },
+    // { key: "baseFee", header: "Base Fee", render: (r) => SAR(r.baseFee) },
     {
       key: "enrolled", header: "Enrolled / Capacity",
       render: (r) => `${r.enrolledCount} / ${r.capacity}`,
@@ -91,9 +147,61 @@ function SessionsPage() {
     </>
   );
 
-  const enrolledForSelected = selected
-    ? mockParticipants.filter((p) => p.session === selected.session).length
+  const renderExpandedRow = (row: MockSession) => {
+    const related = filtered.filter(s => s.name === row.name);
+    if (related.length <= 1) return null;
+
+    const groupedByDay = related.reduce((acc, s) => {
+      if (!acc[s.days]) acc[s.days] = [];
+      acc[s.days].push(s);
+      return acc;
+    }, {} as Record<string, MockSession[]>);
+
+    return (
+      <div className="bg-muted/10 p-4 border-l-4 border-primary">
+        <h4 className="mb-4 text-sm font-semibold text-foreground">Timings</h4>
+        <div className="space-y-5">
+          {Object.entries(groupedByDay).map(([day, sessions]) => (
+            <div key={day} className="space-y-3">
+              <h5 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{day}</h5>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                {sessions.map(s => (
+                  <div key={s.id} className="flex flex-col justify-between rounded-lg border bg-background p-3 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="mb-3 flex justify-between items-start">
+                      <div>
+                        <p className="font-medium text-sm text-foreground">{s.session} {s.ageGroup ? `(${s.ageGroup})` : ""}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">{locName(s.locationId)}</p>
+                      </div>
+                    </div>
+                    <Button size="sm" variant="secondary" className="w-full font-medium" onClick={() => {
+                      setSelected(row);
+                      setSelectedVariantId(s.id);
+                    }}>
+                      View Details
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const enrolledForSelected = currentVariant
+    ? mockParticipants.filter((p) => p.session === currentVariant.session).length
     : 0;
+
+  const handleRowClick = (row: MockSession, toggleExpand: () => void) => {
+    const related = filtered.filter(s => s.name === row.name);
+    if (related.length > 1) {
+      toggleExpand();
+    } else {
+      setSelected(row);
+      setSelectedVariantId(row.id);
+    }
+  };
 
   return (
     <>
@@ -109,36 +217,61 @@ function SessionsPage() {
       />
       <div className="p-6">
         <DataTable
-          data={filtered}
+          data={groupedFiltered}
           columns={columns}
-          searchKeys={["session"]}
+          searchKeys={["session", "name"]}
           searchPlaceholder="Search sessions…"
           filters={filters}
+          expandableContent={renderExpandedRow}
+          onRowClick={handleRowClick}
         />
       </div>
 
-      <Sheet open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
+      <Sheet open={!!selected} onOpenChange={(o) => {
+        if (!o) {
+          setSelected(null);
+          setSelectedVariantId(null);
+        }
+      }}>
         <SheetContent className="w-full sm:max-w-lg">
-          {selected && (
+          {currentVariant && (
             <>
               <SheetHeader>
-                <SheetTitle>{selected.session}</SheetTitle>
-                <SheetDescription>{locName(selected.locationId)}</SheetDescription>
+                <SheetTitle>{currentVariant.name}</SheetTitle>
+                <SheetDescription>{locName(currentVariant.locationId)}</SheetDescription>
               </SheetHeader>
-              <div className="space-y-5 px-4 pb-6">
+              <div className="space-y-5 px-4 pb-6 pt-6">
+                {relatedSessions.length > 1 && (
+                  <div>
+                    <Label className="mb-2 block text-sm font-semibold">Select Day & Time</Label>
+                    <Select value={currentVariant.id} onValueChange={setSelectedVariantId}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a variant" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {relatedSessions.map((s) => (
+                          <SelectItem key={s.id} value={s.id}>
+                            {s.days} • {s.session}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-2 gap-3 text-sm">
-                  <Stat label="Start" value={selected.startDate} />
-                  <Stat label="End" value={selected.endDate} />
-                  <Stat label="Status" value={<StatusBadge status={selected.status === "Open" ? "Active" : selected.status === "Closed" ? "Completed" : "Scheduled"} />} />
-                  <Stat label="Capacity" value={`${selected.enrolledCount} / ${selected.capacity}`} />
+                  <Stat label="Start" value={currentVariant.startDate} />
+                  <Stat label="End" value={currentVariant.endDate} />
+                  <Stat label="Status" value={<StatusBadge status={currentVariant.status === "Open" ? "Active" : currentVariant.status === "Closed" ? "Completed" : "Scheduled"} />} />
+                  <Stat label="Capacity" value={`${currentVariant.enrolledCount} / ${currentVariant.capacity}`} />
                 </div>
                 <div className="rounded-lg border p-4">
                   <h4 className="mb-3 text-sm font-semibold">Fee breakdown</h4>
                   <div className="space-y-2 text-sm">
-                    <Row label="Base fee" value={SAR(selected.baseFee)} />
-                    <Row label="Currency" value={selected.currency} />
+                    <Row label="Base fee" value={SAR(currentVariant.baseFee)} />
+                    <Row label="Currency" value={currentVariant.currency} />
                     <Row label="Enrolled participants" value={enrolledForSelected} />
-                    <Row label="Projected revenue" value={SAR(selected.baseFee * selected.enrolledCount)} bold />
+                    <Row label="Projected revenue" value={SAR(currentVariant.baseFee * currentVariant.enrolledCount)} bold />
                   </div>
                 </div>
               </div>
@@ -150,73 +283,140 @@ function SessionsPage() {
         </SheetContent>
       </Sheet>
 
-      <Sheet open={addOpen} onOpenChange={setAddOpen}>
-        <SheetContent className="w-full sm:max-w-lg">
+      <Sheet open={addOpen} onOpenChange={(open) => {
+        setAddOpen(open);
+        if (!open) setSchedules([]); // reset on close
+      }}>
+        <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
           <SheetHeader>
             <SheetTitle>Add Session</SheetTitle>
-            <SheetDescription>Schedule a new session.</SheetDescription>
+            <SheetDescription>Create a new Session.</SheetDescription>
           </SheetHeader>
-          <form className="space-y-4 pb-6" onSubmit={(e) => { e.preventDefault(); setAddOpen(false); }}>
-            {/* <Field label="Name"><Input placeholder="e.g. Spring 2026" /></Field> */}
+          <form className="space-y-6 pb-6 pt-6" onSubmit={(e) => { e.preventDefault(); setAddOpen(false); setSchedules([]); }}>
+            <Field label="Session Name"><Input placeholder="e.g. Spring 2026" required /></Field>
+            {/* 
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label className="text-base font-semibold">Schedule</Label>
+                <Button type="button" variant="outline" size="sm" onClick={handleAddDay}>
+                  <Plus className="h-4 w-4 mr-2" /> Add Day
+                </Button>
+              </div>
 
+              {schedules.length === 0 && (
+                <div className="text-sm text-muted-foreground border border-dashed rounded-lg p-6 text-center">
+                  No days added. Click "Add Day" to set up the schedule.
+                </div>
+              )}
 
+              {schedules.map((schedule, index) => (
+                <div key={schedule.id} className="border rounded-lg p-4 bg-muted/10 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1 mr-4">
+                      <Select
+                        value={schedule.day}
+                        onValueChange={(val) => setSchedules(schedules.map(s => s.id === schedule.id ? { ...s, day: val } : s))}
+                      >
+                        <SelectTrigger><SelectValue placeholder="Select Day" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="sunday">Sunday</SelectItem>
+                          <SelectItem value="monday">Monday</SelectItem>
+                          <SelectItem value="tuesday">Tuesday</SelectItem>
+                          <SelectItem value="wednesday">Wednesday</SelectItem>
+                          <SelectItem value="thursday">Thursday</SelectItem>
+                          <SelectItem value="friday">Friday</SelectItem>
+                          <SelectItem value="saturday">Saturday</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <Button type="button" variant="ghost" size="icon" className="text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => handleRemoveDay(schedule.id)}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
 
-            <Field label="Day">
-              <Select
-              >
-                <SelectTrigger><SelectValue placeholder="Select Day" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="sunday">Sunday</SelectItem>
-                  <SelectItem value="monday">Monday</SelectItem>
-                  <SelectItem value="tuesday">Tuesday</SelectItem>
-                  <SelectItem value="wednesday">Wednesday</SelectItem>
-                  <SelectItem value="thursday">Thursday</SelectItem>
-                  <SelectItem value="saturday">Saturday</SelectItem>
-                </SelectContent>
-              </Select>
-            </Field>
+                  <div className="pl-2 space-y-3 border-l-2 border-primary/20">
+                    <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Timings</Label>
+                    {schedule.timings.map((timing) => (
+                      <div key={timing.id} className="flex items-center gap-2">
+                        <Input
+                          type="time"
+                          value={timing.start}
+                          onChange={(e) => handleUpdateTiming(schedule.id, timing.id, "start", e.target.value)}
+                          className="w-full"
+                          required
+                        />
+                        <span className="text-muted-foreground text-sm">to</span>
+                        <Input
+                          type="time"
+                          value={timing.end}
+                          onChange={(e) => handleUpdateTiming(schedule.id, timing.id, "end", e.target.value)}
+                          className="w-full"
+                          required
+                        />
+                        <Select
+                          value={timing.ageGroup}
+                          onValueChange={(val) => handleUpdateTiming(schedule.id, timing.id, "ageGroup", val)}
+                        >
+                          <SelectTrigger className="w-[100px] shrink-0"><SelectValue placeholder="Age Group" /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="U4">U4</SelectItem>
+                            <SelectItem value="U6">U6</SelectItem>
+                            <SelectItem value="U8">U8</SelectItem>
+                            <SelectItem value="U10">U10</SelectItem>
+                            <SelectItem value="U12">U12</SelectItem>
+                            <SelectItem value="U14">U14</SelectItem>
+                            <SelectItem value="U16/U18">U16/U18</SelectItem>
+                            <SelectItem value="GIRLS ONLY">GIRLS ONLY</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0"
+                          onClick={() => handleRemoveTiming(schedule.id, timing.id)}
+                          disabled={schedule.timings.length === 1}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                    <Button type="button" variant="link" size="sm" className="px-0 h-auto text-primary" onClick={() => handleAddTiming(schedule.id)}>
+                      + Add another timing
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div> */}
 
-            <Field label="Session Time">
-              <Select
-              >
-                <SelectTrigger><SelectValue placeholder="Select Session" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="sunday">4:30 - 5:30 PM </SelectItem>
-                  <SelectItem value="monday">5:30 - 6:30 PM</SelectItem>
-                  <SelectItem value="tuesday">6:30 - 7:30 PM</SelectItem>
-                  <SelectItem value="wednesday">7:30 - 8:30 PM</SelectItem>
-                  <SelectItem value="thursday">8:30 - 9:30 PM</SelectItem>
-                </SelectContent>
-              </Select>
-            </Field>
-
-
-
-            <Field label="Location">
-              <Select>
-                <SelectTrigger><SelectValue placeholder="Select location" /></SelectTrigger>
-                <SelectContent>
-                  {mockLocations.map((l) => <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </Field>
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="Start Date"><Input type="date" /></Field>
-              <Field label="End Date"><Input type="date" /></Field>
+            <div className="space-y-4 pt-2">
+              <Field label="Location">
+                <Select required>
+                  <SelectTrigger><SelectValue placeholder="Select location" /></SelectTrigger>
+                  <SelectContent>
+                    {mockLocations.map((l) => <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </Field>
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="Start Date"><Input type="date" required /></Field>
+                <Field label="End Date"><Input type="date" required /></Field>
+              </div>
+              {/* <Field label="Base Fee (SAR)"><Input type="number" placeholder="1500" required /></Field> */}
+              <Field label="Status">
+                <Select defaultValue="Upcoming">
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Open">Open</SelectItem>
+                    <SelectItem value="Closed">Closed</SelectItem>
+                    <SelectItem value="Upcoming">Upcoming</SelectItem>
+                  </SelectContent>
+                </Select>
+              </Field>
             </div>
-            <Field label="Base Fee (SAR)"><Input type="number" placeholder="1500" /></Field>
-            <Field label="Status">
-              <Select defaultValue="Upcoming">
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Open">Open</SelectItem>
-                  <SelectItem value="Closed">Closed</SelectItem>
-                  <SelectItem value="Upcoming">Upcoming</SelectItem>
-                </SelectContent>
-              </Select>
-            </Field>
-            <SheetFooter>
-              <Button type="button" variant="outline" onClick={() => setAddOpen(false)}>Cancel</Button>
+
+            <SheetFooter className="pt-4">
+              <Button type="button" variant="outline" onClick={() => { setAddOpen(false); setSchedules([]); }}>Cancel</Button>
               <Button type="submit">Create Session</Button>
             </SheetFooter>
           </form>

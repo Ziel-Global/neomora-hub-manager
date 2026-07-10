@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode, Fragment } from "react";
 import { Search, ArrowUpDown, Download, Plus, Filter } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,7 @@ import { EmptyState } from "@/components/EmptyState";
 export interface Column<T> {
   key: keyof T | string;
   header: string;
-  render?: (row: T) => ReactNode;
+  render?: (row: T, isExpanded?: boolean, toggleExpand?: () => void) => ReactNode;
   sortable?: boolean;
   className?: string;
 }
@@ -22,16 +22,19 @@ interface DataTableProps<T extends { id: string }> {
   addLabel?: string;
   filters?: ReactNode;
   emptyMessage?: string;
+  expandableContent?: (row: T) => ReactNode;
+  onRowClick?: (row: T, toggleExpand: () => void) => void;
 }
 
 export function DataTable<T extends { id: string }>({
   columns, data, searchKeys, searchPlaceholder = "Search…", onAdd, addLabel = "Add",
-  filters, emptyMessage = "No records found",
+  filters, emptyMessage = "No records found", expandableContent, onRowClick,
 }: DataTableProps<T>) {
   const [query, setQuery] = useState("");
   const [sortKey, setSortKey] = useState<string | null>(null);
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const loading = false;
 
   const filtered = useMemo(() => {
@@ -67,6 +70,11 @@ export function DataTable<T extends { id: string }>({
   const handleSort = (key: string) => {
     if (sortKey === key) setSortDir(sortDir === "asc" ? "desc" : "asc");
     else { setSortKey(key); setSortDir("asc"); }
+  };
+  const toggleExpand = (id: string) => {
+    const next = new Set(expanded);
+    next.has(id) ? next.delete(id) : next.add(id);
+    setExpanded(next);
   };
 
   return (
@@ -152,21 +160,37 @@ export function DataTable<T extends { id: string }>({
               </tr>
             )}
             {!loading && filtered.map((row) => (
-              <tr key={row.id} className="border-b transition-colors last:border-0 hover:bg-gray-50">
-                <td className="px-4 py-3">
-                  <Checkbox
-                    checked={selected.has(row.id)}
-                    onCheckedChange={() => toggleOne(row.id)}
-                  />
-                </td>
-                {columns.map((col) => (
-                  <td key={String(col.key)} className={`px-4 py-3 ${col.className ?? ""}`}>
-                    {col.render
-                      ? col.render(row)
-                      : String((row as Record<string, unknown>)[col.key as string] ?? "")}
+              <Fragment key={row.id}>
+                <tr 
+                  className={`border-b transition-colors last:border-0 hover:bg-gray-50 ${onRowClick ? 'cursor-pointer' : ''}`}
+                  onClick={(e) => {
+                    const target = e.target as HTMLElement;
+                    if (target.tagName === 'BUTTON' || target.tagName === 'INPUT' || target.closest('button') || target.closest('input')) return;
+                    if (onRowClick) onRowClick(row, () => toggleExpand(row.id));
+                  }}
+                >
+                  <td className="px-4 py-3">
+                    <Checkbox
+                      checked={selected.has(row.id)}
+                      onCheckedChange={() => toggleOne(row.id)}
+                    />
                   </td>
-                ))}
-              </tr>
+                  {columns.map((col) => (
+                    <td key={String(col.key)} className={`px-4 py-3 ${col.className ?? ""}`}>
+                      {col.render
+                        ? col.render(row, expanded.has(row.id), () => toggleExpand(row.id))
+                        : String((row as Record<string, unknown>)[col.key as string] ?? "")}
+                    </td>
+                  ))}
+                </tr>
+                {expandableContent && expanded.has(row.id) && (
+                  <tr className="border-b bg-gray-50/50">
+                    <td colSpan={columns.length + 1} className="p-0">
+                      {expandableContent(row)}
+                    </td>
+                  </tr>
+                )}
+              </Fragment>
             ))}
           </tbody>
         </table>

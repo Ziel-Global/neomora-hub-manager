@@ -524,7 +524,7 @@ const SAR = (n: number) => `SAR ${n.toLocaleString()}`;
 const LOCATIONS = Array.from(new Set(mockParticipants.map((p) => p.location))).sort();
 const DAYS = ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "SATURDAY"];
 const STATUSES = ["Active", "WaitList", "Inquiry", "Documents Pending", "Fee Pending", "On Hold", "Completed", "Withdrawn"];
-
+const AGE_GROUP = ["U4", "U6", "U8", "U10", "U12", "U14", "U16/U18", "Girls Only"];
 // Priority order used for sorting: each location's WaitList entries are pushed
 // to the bottom of that location's block so Active enrollments surface first,
 // while still keeping everything grouped by location.
@@ -616,7 +616,7 @@ function ParticipantsPage() {
       ),
     },
     { key: "day", header: "DAY" },
-        {key :"session", header: "SESSION"},
+    { key: "session", header: "SESSION" },
 
     { key: "ageGroup", header: "AGE GROUP / SESSION" },
     {
@@ -803,17 +803,8 @@ function ParticipantsPage() {
               </Field>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="Day">
-                <Select name="day">
-                  <SelectTrigger><SelectValue placeholder="Select day" /></SelectTrigger>
-                  <SelectContent>
-                    {DAYS.map((d) => (
-                      <SelectItem key={d} value={d}>{d}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </Field>
+            <div className="grid grid-cols-1 gap-3">
+
               <Field label="Session">
                 <Select name="SessionSlug">
                   <SelectTrigger><SelectValue placeholder="Select Session" /></SelectTrigger>
@@ -821,8 +812,18 @@ function ParticipantsPage() {
                     {/* {mockSessions.map((s) => (
                       <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>
                     ))} */}
-                    <SelectItem value="4:30-5:30">4:30 to 5:30 PM</SelectItem>
-                    <SelectItem value="5:45-7:00">5:45 to 7:00 PM</SelectItem>
+                    <SelectItem value="4:30-5:30">Spring 2025</SelectItem>
+                    <SelectItem value="5:45-7:00">Summer Camp 2025</SelectItem>
+                  </SelectContent>
+                </Select>
+              </Field>
+              <Field label="Age Group">
+                <Select name="Age Group">
+                  <SelectTrigger><SelectValue placeholder="Select Age Group" /></SelectTrigger>
+                  <SelectContent>
+                    {AGE_GROUP.map((d) => (
+                      <SelectItem key={d} value={d}>{d}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </Field>

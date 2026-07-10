@@ -52,6 +52,7 @@ import { Route as AdminParticipantsRouteImport } from './routes/admin.participan
 import { Route as AdminLocationsRouteImport } from './routes/admin.locations'
 import { Route as AdminFeesRouteImport } from './routes/admin.fees'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
+import { Route as AdminClassesRouteImport } from './routes/admin.classes'
 import { Route as AdminAccessRouteImport } from './routes/admin.access'
 import { Route as GuardianPaymentsPayAllRouteImport } from './routes/guardian.payments.pay-all'
 import { Route as GuardianParticipantIdRouteImport } from './routes/guardian.participant.$id'
@@ -278,6 +279,11 @@ const AdminDashboardRoute = AdminDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminClassesRoute = AdminClassesRouteImport.update({
+  id: '/classes',
+  path: '/classes',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminAccessRoute = AdminAccessRouteImport.update({
   id: '/access',
   path: '/access',
@@ -324,6 +330,7 @@ export interface FileRoutesByFullPath {
   '/registration-form': typeof RegistrationFormRoute
   '/staff': typeof StaffRouteWithChildren
   '/admin/access': typeof AdminAccessRoute
+  '/admin/classes': typeof AdminClassesRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/fees': typeof AdminFeesRoute
   '/admin/locations': typeof AdminLocationsRoute
@@ -370,6 +377,7 @@ export interface FileRoutesByTo {
   '/portal-options': typeof PortalOptionsRoute
   '/registration-form': typeof RegistrationFormRoute
   '/admin/access': typeof AdminAccessRoute
+  '/admin/classes': typeof AdminClassesRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/fees': typeof AdminFeesRoute
   '/admin/locations': typeof AdminLocationsRoute
@@ -422,6 +430,7 @@ export interface FileRoutesById {
   '/registration-form': typeof RegistrationFormRoute
   '/staff': typeof StaffRouteWithChildren
   '/admin/access': typeof AdminAccessRoute
+  '/admin/classes': typeof AdminClassesRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/fees': typeof AdminFeesRoute
   '/admin/locations': typeof AdminLocationsRoute
@@ -475,6 +484,7 @@ export interface FileRouteTypes {
     | '/registration-form'
     | '/staff'
     | '/admin/access'
+    | '/admin/classes'
     | '/admin/dashboard'
     | '/admin/fees'
     | '/admin/locations'
@@ -521,6 +531,7 @@ export interface FileRouteTypes {
     | '/portal-options'
     | '/registration-form'
     | '/admin/access'
+    | '/admin/classes'
     | '/admin/dashboard'
     | '/admin/fees'
     | '/admin/locations'
@@ -572,6 +583,7 @@ export interface FileRouteTypes {
     | '/registration-form'
     | '/staff'
     | '/admin/access'
+    | '/admin/classes'
     | '/admin/dashboard'
     | '/admin/fees'
     | '/admin/locations'
@@ -928,6 +940,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminDashboardRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/classes': {
+      id: '/admin/classes'
+      path: '/classes'
+      fullPath: '/admin/classes'
+      preLoaderRoute: typeof AdminClassesRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/access': {
       id: '/admin/access'
       path: '/access'
@@ -975,6 +994,7 @@ declare module '@tanstack/react-router' {
 
 interface AdminRouteChildren {
   AdminAccessRoute: typeof AdminAccessRoute
+  AdminClassesRoute: typeof AdminClassesRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
   AdminFeesRoute: typeof AdminFeesRoute
   AdminLocationsRoute: typeof AdminLocationsRoute
@@ -987,6 +1007,7 @@ interface AdminRouteChildren {
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminAccessRoute: AdminAccessRoute,
+  AdminClassesRoute: AdminClassesRoute,
   AdminDashboardRoute: AdminDashboardRoute,
   AdminFeesRoute: AdminFeesRoute,
   AdminLocationsRoute: AdminLocationsRoute,
